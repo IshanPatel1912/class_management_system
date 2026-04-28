@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, onSnapshot, addDoc, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
 import { Megaphone, Trash2, Send } from 'lucide-react';
+import { getDocs } from 'firebase/firestore';
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
@@ -18,21 +19,56 @@ const Notifications = () => {
     return () => unsubscribe();
   }, []);
 
-  const sendNotification = async (e) => {
-    e.preventDefault();
-    try {
-      await addDoc(collection(db, 'notifications'), {
-        title,
-        message,
-        timestamp: serverTimestamp(),
-        seenBy: [] // This tracks which students clicked it in the app
-      });
+
+const FCM_SERVER_KEY = "YOUR_FCM_SERVER_KEY";
+const sendNotification = async (e) => {
+  e.preventDefault();
+  try {
+    // 1. Save to Firestore as before
+    await addDoc(collection(db, 'notifications'), {
+      title,
+      message,
+      timestamp: serverTimestamp(),
+      seenBy: []
+    });
+
+    // 2. Get all FCM tokens from Firestore
+    const tokensSnapshot = await getDocs(collection(db, 'fcmTokens'));
+    const tokens = tokensSnapshot.docs.map(doc => doc.data().token).filter(Boolean);
+
+    if (tokens.length === 0) {
+      alert("Notification saved! No student devices registered yet.");
       setTitle('');
       setMessage('');
-    } catch (error) {
-      alert("Error sending notification");
+      return;
     }
-  };
+
+    // 3. Send push directly to FCM API
+    const response = await fetch('https://fcm.googleapis.com/fcm/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `key=${FCM_SERVER_KEY}`
+      },
+      body: JSON.stringify({
+        registration_ids: tokens,
+        notification: {
+          title: title,
+          body: message,
+          icon: '/favicon.svg'
+        }
+      })
+    });
+
+    const result = await response.json();
+    console.log('FCM Response:', result);
+    alert(`Notification sent to ${result.success} students!`);
+    setTitle('');
+    setMessage('');
+  } catch (error) {
+    alert("Error: " + error.message);
+  }
+};
 
   return (
     <div className="space-y-6">
