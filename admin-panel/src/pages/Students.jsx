@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { auth, db } from '../firebase';
 import { collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
-import { Plus, Trash2, Edit, X, Key, Upload, FileSpreadsheet } from 'lucide-react';
+import { Plus, Trash2, Edit, X, Key, Upload, FileSpreadsheet, HardDrive, Cloud, Link as LinkIcon } from 'lucide-react';
 
 const Students = () => {
   const [students, setStudents] = useState([]);
@@ -14,6 +14,10 @@ const Students = () => {
   const [excelError, setExcelError] = useState('');
   const [excelFileName, setExcelFileName] = useState('');
   const [isImporting, setIsImporting] = useState(false);
+  const [isImportPopupOpen, setIsImportPopupOpen] = useState(false);
+  const [driveLink, setDriveLink] = useState('');
+  const [isReadingDriveFile, setIsReadingDriveFile] = useState(false);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'studentDetails'), (snapshot) => {
@@ -125,41 +129,85 @@ const Students = () => {
     password: getValue(row, ['password', 'initialpassword']),
   });
 
-  const handleExcelChange = (event) => {
-    const file = event.target.files?.[0];
+  const loadWorkbookRows = (workbook, sourceName) => {
+    const firstSheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[firstSheetName];
+    const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+    const normalizedRows = rows.map(normalizeExcelRow);
+    const validRows = normalizedRows.filter((row) =>
+      row.rollNumber && row.name && row.email && row.phone && row.password.length >= 6
+    );
+
+    if (validRows.length === 0) {
+      setExcelError('No valid rows found. Use columns: rollNumber, name, email, phone, password. Password must be at least 6 characters.');
+      return;
+    }
+
+    setExcelFileName(sourceName);
+    setExcelRows(validRows);
+    if (validRows.length !== rows.length) {
+      setExcelError(`${rows.length - validRows.length} row(s) were skipped because required values were missing or password was too short.`);
+    }
+  };
+
+  const readExcelBuffer = (buffer, sourceName) => {
     setExcelRows([]);
     setExcelError('');
-    setExcelFileName(file?.name || '');
+    const workbook = XLSX.read(buffer, { type: 'array' });
+    loadWorkbookRows(workbook, sourceName);
+  };
 
+  const handleExcelChange = (event) => {
+    const file = event.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = (loadEvent) => {
       try {
-        const workbook = XLSX.read(loadEvent.target.result, { type: 'array' });
-        const firstSheetName = workbook.SheetNames[0];
-        const sheet = workbook.Sheets[firstSheetName];
-        const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
-        const normalizedRows = rows.map(normalizeExcelRow);
-        const validRows = normalizedRows.filter((row) =>
-          row.rollNumber && row.name && row.email && row.phone && row.password.length >= 6
-        );
-
-        if (validRows.length === 0) {
-          setExcelError('No valid rows found. Use columns: rollNumber, name, email, phone, password. Password must be at least 6 characters.');
-          return;
-        }
-
-        setExcelRows(validRows);
-        if (validRows.length !== rows.length) {
-          setExcelError(`${rows.length - validRows.length} row(s) were skipped because required values were missing or password was too short.`);
-        }
+        readExcelBuffer(loadEvent.target.result, file.name);
+        setIsImportPopupOpen(false);
       } catch (error) {
         console.error('Error reading Excel file:', error);
         setExcelError('Could not read this file. Please upload a valid Excel or CSV file.');
       }
     };
     reader.readAsArrayBuffer(file);
+    event.target.value = '';
+  };
+
+  const getDriveDownloadUrl = (url) => {
+    const fileIdMatch = url.match(/\/d\/([^/]+)/) || url.match(/[?&]id=([^&]+)/);
+    if (fileIdMatch?.[1]) {
+      return `https://drive.google.com/uc?export=download&id=${fileIdMatch[1]}`;
+    }
+    return url;
+  };
+
+  const handleDriveImport = async () => {
+    if (!driveLink.trim()) {
+      setExcelError('Paste a Google Drive share link first.');
+      return;
+    }
+
+    setIsReadingDriveFile(true);
+    setExcelRows([]);
+    setExcelError('');
+
+    try {
+      const response = await fetch(getDriveDownloadUrl(driveLink.trim()));
+      if (!response.ok) {
+        throw new Error('The Drive file could not be downloaded.');
+      }
+      const buffer = await response.arrayBuffer();
+      readExcelBuffer(buffer, 'Google Drive Excel file');
+      setDriveLink('');
+      setIsImportPopupOpen(false);
+    } catch (error) {
+      console.error('Error reading Google Drive file:', error);
+      setExcelError('Could not read the Drive file. Make sure the link is shared publicly, or download it and use Local Desktop.');
+    } finally {
+      setIsReadingDriveFile(false);
+    }
   };
 
   const handleImportExcel = async () => {
@@ -222,17 +270,28 @@ const Students = () => {
               Columns: rollNumber, name, email, phone, password
             </p>
           </div>
-          <label className="inline-flex items-center justify-center gap-2 border border-slate-300 rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-700 cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors">
+          <button
+            type="button"
+            onClick={() => setIsImportPopupOpen(true)}
+            className="inline-flex items-center justify-center gap-2 border border-slate-300 rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+          >
             <Upload size={18} />
-            {excelFileName || 'Choose Excel File'}
-            <input
-              type="file"
-              accept=".xlsx,.xls,.csv"
-              className="hidden"
-              onChange={handleExcelChange}
-            />
-          </label>
+            Excel Sheet Upload
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xlsx,.xls,.csv"
+            className="hidden"
+            onChange={handleExcelChange}
+          />
         </div>
+
+        {excelFileName && (
+          <p className="mt-3 text-sm text-slate-600">
+            Selected file: <span className="font-medium text-slate-800">{excelFileName}</span>
+          </p>
+        )}
 
         {excelError && (
           <p className="mt-4 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">
@@ -363,6 +422,66 @@ const Students = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {isImportPopupOpen && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-xl shadow-xl text-slate-900">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+              <h2 className="text-xl font-bold text-slate-800">Choose Excel Source</h2>
+              <button onClick={() => setIsImportPopupOpen(false)} className="text-slate-500 hover:text-slate-800">
+                <X size={24} />
+              </button>
+            </div>
+            <div className="p-6 space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="border border-slate-200 rounded-xl p-5 text-left hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                >
+                  <HardDrive className="text-blue-600 mb-3" size={28} />
+                  <p className="font-semibold text-slate-800">Local Desktop</p>
+                  <p className="text-sm text-slate-500 mt-1">Pick an Excel or CSV file from your computer.</p>
+                </button>
+
+                <div className="border border-slate-200 rounded-xl p-5">
+                  <Cloud className="text-green-600 mb-3" size={28} />
+                  <p className="font-semibold text-slate-800">Google Drive</p>
+                  <p className="text-sm text-slate-500 mt-1">Paste a shared Excel file link from Drive.</p>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Google Drive link</label>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="relative flex-1">
+                    <LinkIcon size={18} className="absolute left-3 top-3 text-slate-400" />
+                    <input
+                      type="url"
+                      value={driveLink}
+                      onChange={(event) => setDriveLink(event.target.value)}
+                      placeholder="https://drive.google.com/file/d/..."
+                      className="w-full border border-slate-300 bg-white text-slate-900 rounded-lg py-2.5 pl-10 pr-3 outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    disabled={isReadingDriveFile}
+                    onClick={handleDriveImport}
+                    className="bg-green-600 hover:bg-green-700 disabled:bg-slate-400 text-white px-4 py-2.5 rounded-lg font-semibold flex items-center justify-center gap-2"
+                  >
+                    <Cloud size={18} />
+                    {isReadingDriveFile ? 'Reading...' : 'Load Drive File'}
+                  </button>
+                </div>
+                <p className="text-xs text-slate-500 mt-2">
+                  The Drive file must be shared so anyone with the link can view it.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       )}
