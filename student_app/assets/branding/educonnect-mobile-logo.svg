@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320" role="img" aria-labelledby="title desc">
+  <title id="title">EduConnect mobile logo</title>
+  <desc id="desc">A connected open book and graduation cap icon for the EduConnect mobile app.</desc>
+  <defs>
+    <linearGradient id="background" x1="48" x2="272" y1="36" y2="284" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#eff6ff"/>
+      <stop offset="1" stop-color="#ccfbf1"/>
+    </linearGradient>
+    <linearGradient id="book" x1="72" x2="248" y1="94" y2="250" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563eb"/>
+      <stop offset="1" stop-color="#14b8a6"/>
+    </linearGradient>
+    <linearGradient id="cap" x1="92" x2="230" y1="62" y2="130" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0f172a"/>
+      <stop offset="1" stop-color="#334155"/>
+    </linearGradient>
+    <filter id="shadow" x="24" y="24" width="272" height="272" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#0f172a" flood-opacity=".18"/>
+    </filter>
+  </defs>
+  <rect width="320" height="320" rx="74" fill="url(#background)"/>
+  <g filter="url(#shadow)">
+    <rect x="52" y="52" width="216" height="216" rx="56" fill="#fff"/>
+    <path fill="url(#book)" d="M76 128c0-9.9 8.1-18 18-18h38c15.1 0 25.8 4.8 31 12 5.2-7.2 15.9-12 31-12h38c9.9 0 18 8.1 18 18v107c0 4.4-3.6 8-8 8h-48c-15.2 0-25.5 3.4-31 9.8-5.5-6.4-15.8-9.8-31-9.8H84c-4.4 0-8-3.6-8-8V128Z"/>
+    <path fill="#fff" d="M101 140h30.5c9.8 0 16.7 2.6 20.5 7.6V223c-5.2-2.9-12.6-4.4-22-4.4h-29V140Zm88 0h30.5v78.6h-29c-9.4 0-16.8 1.5-22 4.4v-75.4c3.8-5 10.7-7.6 20.5-7.6Z"/>
+    <path fill="url(#cap)" d="M163 72 235 105l-72 33-72-33 72-33Z"/>
+    <path stroke="#0f172a" stroke-linecap="round" stroke-width="9" d="M219 115v37"/>
+    <circle cx="219" cy="164" r="11" fill="#14b8a6"/>
+    <path stroke="#2563eb" stroke-linecap="round" stroke-width="9" d="M119 170h23M119 195h23M184 170h23M184 195h23"/>
+  </g>
+</svg>

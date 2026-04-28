@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/auth_service.dart';
+import '../widgets/educonnect_logo.dart';
 import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -63,7 +64,9 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _handleLogin() async {
-    setState(() { _isLoading = true; });
+    setState(() {
+      _isLoading = true;
+    });
     try {
       String? rollNumber = await _authService.login(
         _emailController.text.trim(),
@@ -96,7 +99,9 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     }
     if (mounted) {
-      setState(() { _isLoading = false; });
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -110,13 +115,9 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 80),
-              const Text(
-                'Student Portal',
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
               const SizedBox(height: 48),
+              const EduConnectLogo(size: 118),
+              const SizedBox(height: 42),
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,

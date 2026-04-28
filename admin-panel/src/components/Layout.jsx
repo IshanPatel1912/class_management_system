@@ -25,10 +25,12 @@ const Layout = ({ children }) => {
   return (
     <div className="flex h-screen bg-slate-50 text-slate-900">
       <aside className="w-64 bg-white border-r border-slate-200 flex flex-col shadow-sm z-10">
-        <div className="h-16 flex items-center px-8 border-b border-slate-100">
-          <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            Admin Portal
-          </span>
+        <div className="h-16 flex items-center px-6 border-b border-slate-100">
+          <img
+            src="/educonnect-logo.svg"
+            alt="EduConnect"
+            className="h-10 w-auto"
+          />
         </div>
         
         <nav className="flex-1 overflow-y-auto py-6 px-4 flex flex-col gap-2">
