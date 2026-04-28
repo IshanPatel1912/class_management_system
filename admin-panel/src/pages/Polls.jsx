@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, onSnapshot, addDoc, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
 import { BarChart3, Trash2, Plus, X, Send, Eye } from 'lucide-react';
+import { sendPushToAll } from '../services/oneSignalService';
 
 const Polls = () => {
   const [polls, setPolls] = useState([]);
@@ -49,6 +50,10 @@ const Polls = () => {
         userVotes: {}, // NEW: Maps rollNumber -> selectedOption
         createdAt: serverTimestamp()
       });
+      await sendPushToAll(
+        "📊 New Poll Available!",
+        question.trim()
+      );
       setQuestion('');
       setOptions(['', '']);
     } catch (error) {

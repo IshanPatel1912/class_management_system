@@ -3,6 +3,7 @@ import { db } from '../firebase';
 import { collection, onSnapshot, addDoc, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
 import { Megaphone, Trash2, Send } from 'lucide-react';
 import { getDocs } from 'firebase/firestore';
+import { sendPushToAll } from '../services/oneSignalService';
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
@@ -20,11 +21,10 @@ const Notifications = () => {
   }, []);
 
 
-const FCM_SERVER_KEY = "YOUR_FCM_SERVER_KEY";
 const sendNotification = async (e) => {
   e.preventDefault();
   try {
-    // 1. Save to Firestore as before
+    // Save to Firestore
     await addDoc(collection(db, 'notifications'), {
       title,
       message,
@@ -32,37 +32,10 @@ const sendNotification = async (e) => {
       seenBy: []
     });
 
-    // 2. Get all FCM tokens from Firestore
-    const tokensSnapshot = await getDocs(collection(db, 'fcmTokens'));
-    const tokens = tokensSnapshot.docs.map(doc => doc.data().token).filter(Boolean);
+    // Send push notification to ALL students
+    await sendPushToAll(title, message);
 
-    if (tokens.length === 0) {
-      alert("Notification saved! No student devices registered yet.");
-      setTitle('');
-      setMessage('');
-      return;
-    }
-
-    // 3. Send push directly to FCM API
-    const response = await fetch('https://fcm.googleapis.com/fcm/send', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `key=${FCM_SERVER_KEY}`
-      },
-      body: JSON.stringify({
-        registration_ids: tokens,
-        notification: {
-          title: title,
-          body: message,
-          icon: '/favicon.svg'
-        }
-      })
-    });
-
-    const result = await response.json();
-    console.log('FCM Response:', result);
-    alert(`Notification sent to ${result.success} students!`);
+    alert("Notification sent!");
     setTitle('');
     setMessage('');
   } catch (error) {

@@ -3,6 +3,7 @@ import * as XLSX from 'xlsx';
 import { db } from '../firebase';
 import { collection, onSnapshot, addDoc, serverTimestamp, deleteDoc, doc, writeBatch } from 'firebase/firestore';
 import { GraduationCap, Trash2, CheckCircle, XCircle, Clock, Send, Upload, FileSpreadsheet } from 'lucide-react';
+import { sendPushToStudent } from '../services/oneSignalService';
 
 const Marks = () => {
   const [marks, setMarks] = useState([]);
@@ -51,6 +52,11 @@ const Marks = () => {
         reason: '',
         createdAt: serverTimestamp()
       });
+      await sendPushToStudent(
+        "📝 Your Marks are Published!",
+        `${formData.subject} (${formData.examType}): ${formData.score}`,
+        formData.rollNumber
+      );
       
       // Reset only subject and score to make adding multiple marks for the same exam faster
       setFormData({ ...formData, subject: '', score: '' }); 

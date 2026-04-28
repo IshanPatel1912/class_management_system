@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, onSnapshot, addDoc, deleteDoc, doc, Timestamp, orderBy, query } from 'firebase/firestore';
 import { CalendarDays, Trash2, Send, Clock, Eye } from 'lucide-react';
+import { sendPushToAll } from '../services/oneSignalService';
 
 const Calendar = () => {
   const [events, setEvents] = useState([]);
@@ -27,6 +28,10 @@ const Calendar = () => {
         date: firestoreTimestamp,
         seenBy: [] // NEW: Tracking who views the event
       });
+       await sendPushToAll(
+        `📅 ${formData.type}: ${formData.title.trim()}`,
+        formData.description.trim()
+      );
       setFormData({ title: '', description: '', date: '', type: 'Exam' });
     } catch (error) {
       alert("Error saving event: " + error.message);
