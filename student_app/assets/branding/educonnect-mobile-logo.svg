@@ -1,31 +1,32 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320" role="img" aria-labelledby="title desc">
-  <title id="title">EduConnect mobile logo</title>
-  <desc id="desc">A connected open book and graduation cap icon for the EduConnect mobile app.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">EduConnect mobile app icon</title>
+  <desc id="desc">A blue and teal EduConnect app icon with an EC monogram, book lines, and a graduation cap.</desc>
   <defs>
-    <linearGradient id="background" x1="48" x2="272" y1="36" y2="284" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#eff6ff"/>
-      <stop offset="1" stop-color="#ccfbf1"/>
-    </linearGradient>
-    <linearGradient id="book" x1="72" x2="248" y1="94" y2="250" gradientUnits="userSpaceOnUse">
+    <linearGradient id="background" x1="116" x2="908" y1="82" y2="942" gradientUnits="userSpaceOnUse">
       <stop stop-color="#2563eb"/>
+      <stop offset=".52" stop-color="#0ea5e9"/>
       <stop offset="1" stop-color="#14b8a6"/>
     </linearGradient>
-    <linearGradient id="cap" x1="92" x2="230" y1="62" y2="130" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#0f172a"/>
-      <stop offset="1" stop-color="#334155"/>
+    <linearGradient id="panel" x1="248" x2="776" y1="234" y2="788" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#e0f2fe"/>
     </linearGradient>
-    <filter id="shadow" x="24" y="24" width="272" height="272" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
-      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#0f172a" flood-opacity=".18"/>
+    <filter id="shadow" x="126" y="142" width="772" height="774" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="34" stdDeviation="34" flood-color="#0f172a" flood-opacity=".28"/>
     </filter>
   </defs>
-  <rect width="320" height="320" rx="74" fill="url(#background)"/>
+  <rect width="1024" height="1024" rx="232" fill="url(#background)"/>
+  <circle cx="794" cy="208" r="86" fill="#fff" opacity=".18"/>
+  <circle cx="210" cy="814" r="112" fill="#fff" opacity=".14"/>
   <g filter="url(#shadow)">
-    <rect x="52" y="52" width="216" height="216" rx="56" fill="#fff"/>
-    <path fill="url(#book)" d="M76 128c0-9.9 8.1-18 18-18h38c15.1 0 25.8 4.8 31 12 5.2-7.2 15.9-12 31-12h38c9.9 0 18 8.1 18 18v107c0 4.4-3.6 8-8 8h-48c-15.2 0-25.5 3.4-31 9.8-5.5-6.4-15.8-9.8-31-9.8H84c-4.4 0-8-3.6-8-8V128Z"/>
-    <path fill="#fff" d="M101 140h30.5c9.8 0 16.7 2.6 20.5 7.6V223c-5.2-2.9-12.6-4.4-22-4.4h-29V140Zm88 0h30.5v78.6h-29c-9.4 0-16.8 1.5-22 4.4v-75.4c3.8-5 10.7-7.6 20.5-7.6Z"/>
-    <path fill="url(#cap)" d="M163 72 235 105l-72 33-72-33 72-33Z"/>
-    <path stroke="#0f172a" stroke-linecap="round" stroke-width="9" d="M219 115v37"/>
-    <circle cx="219" cy="164" r="11" fill="#14b8a6"/>
-    <path stroke="#2563eb" stroke-linecap="round" stroke-width="9" d="M119 170h23M119 195h23M184 170h23M184 195h23"/>
+    <rect x="174" y="176" width="676" height="676" rx="176" fill="url(#panel)"/>
+    <path fill="#0f172a" d="M512 238 722 332 512 426 302 332l210-94Z"/>
+    <path stroke="#0f172a" stroke-linecap="round" stroke-width="28" d="M674 360v106"/>
+    <circle cx="674" cy="506" r="34" fill="#14b8a6"/>
+    <path fill="#2563eb" d="M264 452c0-38 30-68 68-68h122c22 0 43 9 58 24 15-15 36-24 58-24h122c38 0 68 30 68 68v238c0 18-14 32-32 32H582c-28 0-52 12-70 32-18-20-42-32-70-32H296c-18 0-32-14-32-32V452Z"/>
+    <path fill="#ffffff" d="M334 468h108c24 0 42 8 54 24v160c-16-8-36-12-60-12H334V468Zm248 0h108v172H588c-24 0-44 4-60 12V492c12-16 30-24 54-24Z"/>
+    <path stroke="#14b8a6" stroke-linecap="round" stroke-width="30" d="M374 532h82M374 592h82M568 532h82M568 592h82"/>
+    <path fill="#0f766e" d="M319 774h386c22 0 40 18 40 40H279c0-22 18-40 40-40Z"/>
+    <text x="512" y="708" fill="#0f172a" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="232" font-weight="900" letter-spacing="-10" text-anchor="middle">EC</text>
   </g>
 </svg>

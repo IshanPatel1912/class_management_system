@@ -66,6 +66,7 @@ flutter:
 
   assets:
     - assets/branding/educonnect-mobile-logo.svg
+    - assets/branding/educonnect-app-icon.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
