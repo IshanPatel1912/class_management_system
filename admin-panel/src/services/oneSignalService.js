@@ -1,5 +1,5 @@
 const ONESIGNAL_APP_ID = "308f3e64-aa90-464a-8609-caafabfb60ba";
-const ONESIGNAL_REST_API_KEY = "os_v2_app_gcht4zfksbdevbqjzkx2x63axilbaudqq63udundyw6jzoe2lv75gvgyzov6w46zw3to3bfozvdhfg6wuvn7e7dkb267f3mam27c2fy";
+const ONESIGNAL_REST_API_KEY = "os_v2_app_gcht4zfksbdevbqjzkx2x63axi7yamyyy2rutjuu6kzrug2cvv4ik5njqih3i4fy2hs24372smzeiaznfkdvm3egs6fuoufdda265cq";
 
 export const sendPushToAll = async (title, message) => {
   try {

@@ -5,7 +5,6 @@ import { Folder, FileText, ChevronRight, Home, Plus, Trash2, Eye } from 'lucide-
 
 const Materials = () => {
   const [items, setItems] = useState([]);
-  // FIX: Using 'root' instead of null
   const [currentFolder, setCurrentFolder] = useState({ id: 'root', name: 'Root' });
   const [folderHistory, setFolderHistory] = useState([{ id: 'root', name: 'Root' }]);
   
@@ -15,7 +14,6 @@ const Materials = () => {
   const [fileData, setFileData] = useState({ title: '', description: '', link: '' });
 
   useEffect(() => {
-    // This query is now perfectly stable
     const q = query(
       collection(db, 'materials'), 
       where('parentId', '==', currentFolder.id)
@@ -146,24 +144,56 @@ const Materials = () => {
           </div>
         )}
         
+        {/* Render Folders */}
         {items.filter(i => i.type === 'folder').map(folder => (
           <div key={folder.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all group relative cursor-pointer flex flex-col" onClick={() => navigateToFolder(folder.id, folder.title)}>
             <button onClick={(e) => { e.stopPropagation(); handleDelete(folder.id); }} className="absolute top-2 right-2 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
             <Folder size={48} className="text-amber-400 mb-2 mx-auto" fill="currentColor" />
             <h3 className="text-center font-semibold text-slate-800 truncate mb-2">{folder.title}</h3>
-            <div className="mt-auto border-t border-slate-100 pt-2 flex items-center justify-center gap-1 text-[10px] text-slate-500">
-              <Eye size={12} /> {folder.seenBy?.length || 0} views
+            
+            {/* Sorted Seen By Section */}
+            <div className="mt-auto border-t border-slate-100 pt-2 w-full">
+              <p className="text-[10px] font-semibold text-slate-500 mb-1 flex items-center justify-center gap-1">
+                <Eye size={12} /> Seen by:
+              </p>
+              <div className="flex flex-wrap justify-center gap-1">
+                {folder.seenBy && folder.seenBy.length > 0 ? (
+                  [...folder.seenBy].sort((a, b) => String(a).localeCompare(String(b))).map((roll, idx) => (
+                    <span key={idx} className="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded text-[10px] border border-slate-200">
+                      {roll}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-[10px] text-slate-400 italic">No views yet</span>
+                )}
+              </div>
             </div>
           </div>
         ))}
 
+        {/* Render Files */}
         {items.filter(i => i.type === 'file').map(file => (
           <div key={file.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all group relative cursor-pointer flex flex-col" onClick={() => window.open(file.link, '_blank')}>
             <button onClick={(e) => { e.stopPropagation(); handleDelete(file.id); }} className="absolute top-2 right-2 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
             <FileText size={48} className="text-blue-500 mb-2 mx-auto" />
             <h3 className="text-center font-semibold text-slate-800 truncate mb-2">{file.title}</h3>
-            <div className="mt-auto border-t border-slate-100 pt-2 flex items-center justify-center gap-1 text-[10px] text-slate-500">
-              <Eye size={12} /> {file.seenBy?.length || 0} views
+            
+            {/* Sorted Seen By Section */}
+            <div className="mt-auto border-t border-slate-100 pt-2 w-full">
+              <p className="text-[10px] font-semibold text-slate-500 mb-1 flex items-center justify-center gap-1">
+                <Eye size={12} /> Seen by:
+              </p>
+              <div className="flex flex-wrap justify-center gap-1">
+                {file.seenBy && file.seenBy.length > 0 ? (
+                  [...file.seenBy].sort((a, b) => String(a).localeCompare(String(b))).map((roll, idx) => (
+                    <span key={idx} className="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded text-[10px] border border-slate-200">
+                      {roll}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-[10px] text-slate-400 italic">No views yet</span>
+                )}
+              </div>
             </div>
           </div>
         ))}

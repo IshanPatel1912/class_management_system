@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { db } from '../firebase';
 import { collection, onSnapshot, addDoc, serverTimestamp, deleteDoc, doc, writeBatch } from 'firebase/firestore';
-import { GraduationCap, Trash2, CheckCircle, XCircle, Clock, Send, Upload, FileSpreadsheet } from 'lucide-react';
+import { GraduationCap, Trash2, CheckCircle, XCircle, Clock, Send, Upload, FileSpreadsheet, Search, Filter } from 'lucide-react';
 import { sendPushToStudent } from '../services/oneSignalService';
 
 const Marks = () => {
@@ -14,12 +14,18 @@ const Marks = () => {
     examType: '',
     score: ''
   });
+  
+  // Excel Import States
   const [excelRows, setExcelRows] = useState([]);
   const [excelError, setExcelError] = useState('');
   const [excelFileName, setExcelFileName] = useState('');
   const [isImporting, setIsImporting] = useState(false);
 
-  // Fetch Students (for the dropdown) and Marks (for the table)
+  // Filter States
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  // Fetch Students and Marks
   useEffect(() => {
     const unsubStudents = onSnapshot(collection(db, 'studentDetails'), (snapshot) => {
       setStudents(snapshot.docs.map(doc => doc.data()));
@@ -30,8 +36,7 @@ const Marks = () => {
         id: doc.id,
         ...doc.data()
       }));
-      // Sort to show newest first
-      setMarks(marksData.sort((a, b) => b.createdAt?.toMillis() - a.createdAt?.toMillis()));
+      setMarks(marksData);
     });
 
     return () => {
@@ -48,7 +53,7 @@ const Marks = () => {
         subject: formData.subject,
         examType: formData.examType,
         score: formData.score,
-        status: 'pending', // Matches your Flutter logic
+        status: 'pending',
         reason: '',
         createdAt: serverTimestamp()
       });
@@ -58,7 +63,6 @@ const Marks = () => {
         formData.rollNumber
       );
       
-      // Reset only subject and score to make adding multiple marks for the same exam faster
       setFormData({ ...formData, subject: '', score: '' }); 
     } catch (error) {
       alert("Error saving mark: " + error.message);
@@ -71,6 +75,7 @@ const Marks = () => {
     }
   };
 
+  // --- EXCEL LOGIC START ---
   const getValue = (row, keys) => {
     const normalizedRow = Object.entries(row).reduce((acc, [key, value]) => {
       const normalizedKey = key.toString().toLowerCase().replace(/[\s_-]/g, '');
@@ -84,7 +89,6 @@ const Marks = () => {
         return value.toString().trim();
       }
     }
-
     return '';
   };
 
@@ -161,6 +165,21 @@ const Marks = () => {
       setIsImporting(false);
     }
   };
+  // --- EXCEL LOGIC END ---
+
+  // Filter & Sort Logic
+  const filteredMarks = marks
+    .filter((mark) => {
+      const matchesSearch = 
+        mark.rollNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        mark.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        mark.examType.toLowerCase().includes(searchTerm.toLowerCase());
+        
+      const matchesStatus = statusFilter === 'all' || mark.status === statusFilter;
+      
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a, b) => String(a.rollNumber).localeCompare(String(b.rollNumber), undefined, { numeric: true }));
 
   return (
     <div className="space-y-6 text-slate-900">
@@ -240,12 +259,7 @@ const Marks = () => {
               <span className="text-sm font-medium text-slate-700">
                 {excelFileName || 'Choose .xlsx, .xls, or .csv file'}
               </span>
-              <input
-                type="file"
-                accept=".xlsx,.xls,.csv"
-                className="hidden"
-                onChange={handleExcelChange}
-              />
+              <input type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleExcelChange} />
             </label>
             <p className="mt-2 text-xs text-slate-500">
               Columns: rollNumber, examType, subject, score
@@ -295,8 +309,37 @@ const Marks = () => {
           </div>
         </div>
 
-        {/* Marks History Table */}
-        <div className="lg:col-span-2">
+        {/* Marks History Table Section */}
+        <div className="lg:col-span-2 flex flex-col gap-4">
+          
+          {/* Filtering Tools */}
+          <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col sm:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <input 
+                type="text" 
+                placeholder="Search Roll No, Subject, or Exam..." 
+                className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white transition-colors"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="flex items-center gap-2 sm:w-1/3">
+              <Filter className="text-slate-400" size={18} />
+              <select 
+                className="w-full p-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white transition-colors"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="all">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Table */}
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden w-full overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[700px]">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 text-sm">
@@ -309,11 +352,11 @@ const Marks = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {marks.length === 0 ? (
-                  <tr><td colSpan="5" className="p-8 text-center text-slate-500">No marks uploaded yet.</td></tr>
+                {filteredMarks.length === 0 ? (
+                  <tr><td colSpan="5" className="p-8 text-center text-slate-500">No marks found matching your filters.</td></tr>
                 ) : (
-                  marks.map((mark) => (
-                    <tr key={mark.id} className="hover:bg-slate-50 transition-colors bg-white">
+                  filteredMarks.map((mark) => (
+                    <tr key={mark.id} className="hover:bg-slate-50 transition-colors bg-white align-top">
                       <td className="p-4 font-medium text-slate-900">{mark.rollNumber}</td>
                       <td className="p-4">
                         <p className="font-bold text-slate-800">{mark.subject}</p>
@@ -331,14 +374,18 @@ const Marks = () => {
                             <CheckCircle size={14} /> Approved
                           </span>
                         )}
+                        {/* Improved Rejection UI */}
                         {mark.status === 'rejected' && (
-                          <div>
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                          <div className="flex flex-col gap-2">
+                            <span className="inline-flex w-fit items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
                               <XCircle size={14} /> Rejected
                             </span>
-                            <p className="text-xs text-red-600 mt-1 italic max-w-[150px] truncate" title={mark.reason}>
-                              "{mark.reason}"
-                            </p>
+                            {mark.reason && (
+                              <p className="text-xs text-red-700 bg-red-50 p-2 rounded-md border border-red-100 whitespace-normal break-words max-w-xs">
+                                <span className="font-semibold block mb-0.5">Reason for rejection:</span>
+                                {mark.reason}
+                              </p>
+                            )}
                           </div>
                         )}
                       </td>
