@@ -23,8 +23,8 @@ const Layout = ({ children }) => {
   ];
 
   return (
-    <div className="flex h-screen bg-slate-50 text-slate-900">
-      <aside className="w-64 bg-white border-r border-slate-200 flex flex-col shadow-sm z-10">
+    <div className="flex h-screen gap-6 bg-slate-50 p-6 text-slate-900">
+      <aside className="w-64 shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm z-10 flex flex-col">
         <div className="h-16 flex items-center px-6 border-b border-slate-100">
           <img
             src="/educonnect-logo.svg"
@@ -66,7 +66,7 @@ const Layout = ({ children }) => {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto rounded-2xl border border-slate-200 bg-white/50">
         <div className="p-8 max-w-7xl mx-auto">
           {children}
         </div>
