@@ -1,5 +1,5 @@
 const ONESIGNAL_APP_ID = "308f3e64-aa90-464a-8609-caafabfb60ba";
-const ONESIGNAL_REST_API_KEY = "os_v2_app_gcht4zfksbdevbqjzkx2x63axl6mvqootiee6bmjkeuah6ykbckqfqbum3uzcok6mounhgzhntva4pz73h2kgjfviwzstsyv2i5fajq"; // new key from Step 1
+const ONESIGNAL_REST_API_KEY = "os_v2_app_gcht4zfksbdevbqjzkx2x63axilbaudqq63udundyw6jzoe2lv75gvgyzov6w46zw3to3bfozvdhfg6wuvn7e7dkb267f3mam27c2fy";
 
 export const sendPushToAll = async (title, message) => {
   try {
@@ -20,7 +20,7 @@ export const sendPushToAll = async (title, message) => {
     });
 
     const data = await response.json();
-    console.log('Push sent:', data);
+    console.log('Push sent to all:', data);
     return data;
   } catch (error) {
     console.error('Push error:', error);
@@ -29,6 +29,7 @@ export const sendPushToAll = async (title, message) => {
 
 export const sendPushToStudent = async (title, message, rollNumber) => {
   try {
+    // ✅ Using external_id instead of tags — much more reliable
     const response = await fetch('/api/onesignal/api/v1/notifications', {
       method: 'POST',
       headers: {
@@ -37,9 +38,10 @@ export const sendPushToStudent = async (title, message, rollNumber) => {
       },
       body: JSON.stringify({
         app_id: ONESIGNAL_APP_ID,
-        filters: [
-          { field: "tag", key: "rollNumber", relation: "=", value: rollNumber }
-        ],
+        include_aliases: {
+          external_id: [rollNumber] // ✅ directly use roll number
+        },
+        target_channel: "push",
         headings: { en: title },
         contents: { en: message },
       })

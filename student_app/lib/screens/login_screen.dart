@@ -17,55 +17,48 @@ class _LoginScreenState extends State<LoginScreen> {
   final AuthService _authService = AuthService();
   bool _isLoading = false;
 
-  Future<void> _setupOneSignal(String rollNumber) async {
+  // ✅ Save OneSignal token to Firestore
+  Future<void> _saveOneSignalToken(String rollNumber) async {
     try {
-      print('=== OneSignal Setup Starting ===');
-
-      // Step 1: Request permission
-      bool granted = await OneSignal.Notifications.requestPermission(true);
-      print('Notification permission granted: $granted');
-
-      if (!granted) {
-        print('Permission denied — cannot receive notifications');
-        return;
-      }
-
-      // Step 2: Wait for OneSignal to fully register
-      await Future.delayed(const Duration(seconds: 3));
-
-      // Step 3: Set External User ID (most reliable method)
-      await OneSignal.login(rollNumber);
-      print('OneSignal login done with: $rollNumber');
-
-      // Step 4: Also set tag as backup
-      OneSignal.User.addTagWithKey("rollNumber", rollNumber);
-      print('Tag set: rollNumber = $rollNumber');
-
-      // Step 5: Wait and verify
+      // Wait for OneSignal to fully initialize
       await Future.delayed(const Duration(seconds: 2));
-      final tags = await OneSignal.User.getTags();
-      print('Current tags: $tags');
 
-      final onesignalId = await OneSignal.User.getOnesignalId();
-      print('OneSignal ID: $onesignalId');
+      final deviceId = await OneSignal.User.getOnesignalId();
+      print('OneSignal Device ID: $deviceId');
 
-      // Step 6: Save everything to Firestore
-      if (onesignalId != null) {
+      if (deviceId != null) {
+        // Save to Firestore
         await FirebaseFirestore.instance
             .collection('oneSignalTokens')
             .doc(rollNumber)
             .set({
-          'playerId': onesignalId,
-          'externalId': rollNumber,
+          'playerId': deviceId,
           'rollNumber': rollNumber,
           'updatedAt': FieldValue.serverTimestamp(),
         });
-        print('Saved to Firestore successfully!');
+        print('OneSignal token saved to Firestore for: $rollNumber');
+      } else {
+        print('OneSignal Device ID is null — permission may be denied');
       }
-
-      print('=== OneSignal Setup Complete ===');
     } catch (e) {
-      print('OneSignal setup error: $e');
+      print('OneSignal token save error: $e');
+    }
+  }
+
+  // ✅ Set roll number as tag in OneSignal
+  Future<void> _setOneSignalTag(String rollNumber) async {
+    try {
+      // Wait for device to be fully registered
+      await Future.delayed(const Duration(seconds: 3));
+
+      OneSignal.User.addTagWithKey("rollNumber", rollNumber);
+      print('OneSignal tag set: rollNumber = $rollNumber');
+
+      // Verify tags were set
+      final tags = await OneSignal.User.getTags();
+      print('OneSignal tags after setting: $tags');
+    } catch (e) {
+      print('OneSignal tag error: $e');
     }
   }
 
@@ -78,9 +71,14 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (rollNumber != null && mounted) {
-        // Setup OneSignal with roll number
-        await _setupOneSignal(rollNumber);
+        // ✅ Request notification permission first
+        await OneSignal.Notifications.requestPermission(true);
 
+        // ✅ Save token and set tag
+        await _saveOneSignalToken(rollNumber);
+        await _setOneSignalTag(rollNumber);
+
+        // ✅ Navigate to home
         if (mounted) {
           Navigator.pushReplacement(
             context,
