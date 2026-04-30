@@ -18,7 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final AuthService _authService = AuthService();
   bool _isLoading = false;
 
-  // ✅ Save OneSignal token to Firestore
+  
   Future<void> _saveOneSignalToken(String rollNumber) async {
     try {
       // Wait for OneSignal to fully initialize
@@ -46,10 +46,9 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // ✅ Set roll number as tag in OneSignal
+  
   Future<void> _setOneSignalTag(String rollNumber) async {
     try {
-      // Wait for device to be fully registered
       await Future.delayed(const Duration(seconds: 3));
 
       OneSignal.User.addTagWithKey("rollNumber", rollNumber);
@@ -74,14 +73,11 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (rollNumber != null && mounted) {
-        // ✅ Request notification permission first
         await OneSignal.Notifications.requestPermission(true);
 
-        // ✅ Save token and set tag
         await _saveOneSignalToken(rollNumber);
         await _setOneSignalTag(rollNumber);
 
-        // ✅ Navigate to home
         if (mounted) {
           Navigator.pushReplacement(
             context,

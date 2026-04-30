@@ -1,5 +1,5 @@
 const ONESIGNAL_APP_ID = "308f3e64-aa90-464a-8609-caafabfb60ba";
-const ONESIGNAL_REST_API_KEY = "os_v2_app_gcht4zfksbdevbqjzkx2x63axi7yamyyy2rutjuu6kzrug2cvv4ik5njqih3i4fy2hs24372smzeiaznfkdvm3egs6fuoufdda265cq";
+const ONESIGNAL_REST_API_KEY = "os_v2_app_gcht4zfksbdevbqjzkx2x63axkwrza4rls6uugm2sc4dim5oqkku77nrp5nhk5h5ccmjzto4anhsrxkginwggxiq622iy744qovcboq";
 
 export const sendPushToAll = async (title, message) => {
   try {
@@ -39,7 +39,7 @@ export const sendPushToStudent = async (title, message, rollNumber) => {
       body: JSON.stringify({
         app_id: ONESIGNAL_APP_ID,
         include_aliases: {
-          external_id: [rollNumber] // ✅ directly use roll number
+          external_id: [rollNumber] 
         },
         target_channel: "push",
         headings: { en: title },

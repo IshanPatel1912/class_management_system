@@ -65,7 +65,7 @@ class MarkRecord {
   final String rollNumber;
   final String subject;
   final String examType;
-  final String score; // Changed from int to String
+  final String score; 
   final String status;
   final String reason;
 
@@ -86,7 +86,6 @@ class MarkRecord {
       rollNumber: data['rollNumber'] ?? '',
       subject: data['subject'] ?? '',
       examType: data['examType'] ?? '',
-      // .toString() safely handles it whether it was saved as a number or text
       score: data['score'].toString(), 
       status: data['status'] ?? 'pending',
       reason: data['reason'] ?? '',
@@ -127,9 +126,9 @@ class AppEvent {
 class MaterialItem {
   final String id;
   final String title;
-  final String type; // 'folder' or 'file'
-  final String link; // Standardized to match React
-  final String? parentId; // Tracks which folder it belongs to
+  final String type; 
+  final String link; 
+  final String? parentId; 
 
   MaterialItem({
     required this.id,
@@ -145,7 +144,7 @@ class MaterialItem {
       id: doc.id,
       title: data['title'] ?? 'Untitled',
       type: data['type'] ?? 'file',
-      link: data['link'] ?? '', // Fix: Matches the Admin Panel
+      link: data['link'] ?? '', 
       parentId: data['parentId'],
     );
   }

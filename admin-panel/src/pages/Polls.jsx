@@ -46,8 +46,8 @@ const Polls = () => {
         options: validOptions,
         results: initialResults,
         votedBy: [],
-        seenBy: [], // NEW: Tracks who viewed it
-        userVotes: {}, // NEW: Maps rollNumber -> selectedOption
+        seenBy: [], 
+        userVotes: {}, 
         createdAt: serverTimestamp()
       });
       await sendPushToAll(

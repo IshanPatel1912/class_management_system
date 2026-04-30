@@ -136,8 +136,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 style: const TextStyle(fontSize: 16, color: Colors.grey),
                 textAlign: TextAlign.center),
             const SizedBox(height: 32),
-            
-            // Database Details
+
             TextField(
               controller: _nameController,
               decoration: const InputDecoration(labelText: 'Full Name', border: OutlineInputBorder()),
@@ -162,7 +161,6 @@ class _ProfileTabState extends State<ProfileTab> {
             ),
             const Divider(height: 48, thickness: 2),
 
-            // Authentication Credentials
             const Text('Account Settings', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             OutlinedButton(

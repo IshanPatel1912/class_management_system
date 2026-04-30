@@ -26,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
       PollTab(rollNumber: widget.rollNumber),
       MarksTab(rollNumber: widget.rollNumber),
       CalendarTab(rollNumber: widget.rollNumber),
-      MaterialsTab(rollNumber: widget.rollNumber), // Pass the rollNumber!
+      MaterialsTab(rollNumber: widget.rollNumber), 
       ProfileTab(rollNumber: widget.rollNumber),
     ];
   }

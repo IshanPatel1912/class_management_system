@@ -10,12 +10,11 @@ import 'screens/home_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ✅ Fixed: added options parameter
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // ✅ OneSignal initialize only — don't request permission here
+
   OneSignal.initialize("308f3e64-aa90-464a-8609-caafabfb60ba");
 
   runApp(const StudentApp());
@@ -129,7 +128,6 @@ class AuthGate extends StatelessWidget {
                 );
               }
               if (rollSnapshot.hasData && rollSnapshot.data != null) {
-                // ✅ NEW: Setup OneSignal every time app opens
                 _setupOneSignalForExistingUser(rollSnapshot.data!);
                 return HomeScreen(rollNumber: rollSnapshot.data!);
               }

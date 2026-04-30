@@ -26,7 +26,7 @@ const Calendar = () => {
         description: formData.description.trim(),
         type: formData.type,
         date: firestoreTimestamp,
-        seenBy: [] // NEW: Tracking who views the event
+        seenBy: [] 
       });
        await sendPushToAll(
         `📅 ${formData.type}: ${formData.title.trim()}`,

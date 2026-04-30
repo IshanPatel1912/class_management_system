@@ -17,7 +17,6 @@ export const requestNotificationPermission = async (rollNumber) => {
     const token = await getToken(messaging, { vapidKey: VAPID_KEY });
     
     if (token && rollNumber) {
-      // Save the token to Firestore linked to the student's roll number
       await setDoc(doc(db, 'fcmTokens', rollNumber), {
         token: token,
         rollNumber: rollNumber,
@@ -32,7 +31,6 @@ export const requestNotificationPermission = async (rollNumber) => {
   }
 };
 
-// Listen for foreground messages (when app is open)
 export const onForegroundMessage = (callback) => {
   return onMessage(messaging, (payload) => {
     callback(payload);

@@ -38,7 +38,6 @@ class _CalendarTabState extends State<CalendarTab> {
           if (snapshot.hasError) return const Center(child: Text('Error loading events'));
           if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
 
-          // Group events by date
           Map<DateTime, List<AppEvent>> eventsMap = {};
           for (var doc in snapshot.data!.docs) {
             AppEvent event = AppEvent.fromFirestore(doc);
@@ -50,12 +49,10 @@ class _CalendarTabState extends State<CalendarTab> {
             eventsMap[normalizedDate]!.add(event);
           }
 
-          // Get events for the currently selected day
           List<AppEvent> selectedEvents = [];
           if (_selectedDay != null) {
             selectedEvents = eventsMap[_normalizeDate(_selectedDay!)] ?? [];
-            
-            // Mark these events as seen when the user clicks on the day
+
             for (var event in selectedEvents) {
               _markAsSeen(event.id, event.seenBy);
             }
@@ -74,7 +71,6 @@ class _CalendarTabState extends State<CalendarTab> {
                     _focusedDay = focusedDay;
                   });
                 },
-                // This puts the little dots under dates with events
                 eventLoader: (day) => eventsMap[_normalizeDate(day)] ?? [],
                 calendarStyle: const CalendarStyle(
                   markerDecoration: BoxDecoration(color: Colors.blue, shape: BoxShape.circle),
@@ -88,8 +84,7 @@ class _CalendarTabState extends State<CalendarTab> {
               ),
               const Divider(height: 1, thickness: 1),
               const SizedBox(height: 8),
-              
-              // Display selected events below the calendar
+ 
               Expanded(
                 child: selectedEvents.isEmpty
                     ? const Center(child: Text('No events for this day.', style: TextStyle(color: Colors.grey)))
